@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>GG Task Hub · ตารางงานกลางของทีม</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f6f5c'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">ใกล้กัน · Glaigan Team Ops</div>
+    <h1>ตารางงานกลางของทีม<span class="en">Team Central Task Board</span></h1>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="panel active" id="panel-overview">
+    <div id="urgentBox"></div>
+    <div class="grid-people" id="overviewGrid"></div>
+  </section>
+
+  <!-- person panels injected by JS -->
+  <div id="personPanels"></div>
+
+  <section class="panel" id="panel-calendar">
+    <div class="month-nav" id="calMonthNav">
+      <button data-cal-act="prev">‹</button>
+      <div class="label" id="calMonthLabel"></div>
+      <button data-cal-act="next">›</button>
+      <button class="today-btn" data-cal-act="today">เดือนนี้ <span class="en-i">· This month</span></button>
+      <label class="cal-toggle"><input type="checkbox" id="calShowStaff" checked> แสดงงานของพนักงาน <span class="en-i">· Show staff tasks</span></label>
+    </div>
+
+    <div class="addtask" id="calAddForm">
+      <select id="calAddDay"></select>
+      <input type="text" id="calAddText" placeholder="ชื่อกิจกรรม เช่น ประชุมทีม 10:00 น. / Event name, e.g. Team meeting 10:00">
+      <label style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-soft);">
+        <input type="checkbox" id="calAddTag" style="width:auto;appearance:auto;"> สำคัญ/ไฮไลต์ <span class="en-i">· Important / highlight</span>
+      </label>
+      <button type="button" class="submit" id="calAddSubmit">+ เพิ่มกิจกรรม <span class="en-i">· Add event</span></button>
+      <span class="hint">เพิ่มนัดหมาย/กิจกรรมของบริษัทลงวันที่ที่เลือก ทุกคนที่เปิดหน้านี้จะเห็นทันที<span class="en">Add a company appointment/event on the selected day — everyone with this page open sees it instantly.</span></span>
+    </div>
+
+    <div class="cal-wrap">
+      <table class="cal">
+        <caption id="calCaption">ปฏิทินกิจกรรมบริษัท<span class="en">Company Events Calendar</span></caption>
+        <thead><tr>
+          <th>อา<span class="en">Sun</span></th><th>จ<span class="en">Mon</span></th><th>อ<span class="en">Tue</span></th><th>พ<span class="en">Wed</span></th><th>พฤ<span class="en">Thu</span></th><th>ศ<span class="en">Fri</span></th><th>ส<span class="en">Sat</span></th>
+        </tr></thead>
+        <tbody id="calBody"></tbody>
+      </table>
+    </div>
+    <div class="cal-legend" id="calLegend"></div>
+  </section>
+
+  <footer class="foot">อัปเดตข้อมูลจาก JD ของแต่ละตำแหน่ง (ก.ย. 2569) · เช็กบ็อกซ์ทุกช่องบันทึกแบบเรียลไทม์ให้ทุกคนที่เปิดหน้านี้เห็นตรงกัน<span class="en">Updated from each position's job description (Sep 2026) · Every checkbox saves in real time, so everyone with this page open sees the same thing.</span></footer>
+</div>
+<div class="status-pill" id="statusPill">กำลังเชื่อมต่อ… · Connecting…</div>
+
+<div class="modal-backdrop" id="eventModalBackdrop">
+  <div class="modal-box" id="eventModalBox" role="dialog" aria-modal="true">
+    <button type="button" class="modal-close" id="eventModalClose" aria-label="ปิด / Close">✕</button>
+    <h3 id="eventModalTitle" style="font-size:18px; padding-right:26px;"></h3>
+
+    <div class="modal-section">
+      <div class="modal-label">ผู้รับผิดชอบ<span class="en">Responsible</span></div>
+      <div class="resp-chips" id="eventRespChips"></div>
+    </div>
+
+    <div class="modal-section modal-row">
+      <div>
+        <div class="modal-label">กำหนดเสร็จ<span class="en">Due date</span></div>
+        <input type="date" id="eventDue">
+      </div>
+      <div style="flex:1;">
+        <div class="modal-label">รายละเอียด / ความคืบหน้า<span class="en">Details / progress</span></div>
+        <textarea id="eventNote" rows="3" placeholder="กรอกรายละเอียด / Enter details"></textarea>
+      </div>
+    </div>
+    <button type="button" class="submit" id="eventSaveMeta" style="align-self:flex-start;">บันทึก <span class="en-i">· Save</span></button>
+
+    <div class="modal-section">
+      <div class="modal-label">อัพเดทความคืบหน้า<span class="en">Progress updates</span></div>
+      <div id="eventComments" class="comment-list"></div>
+      <div class="comment-form">
+        <input type="text" id="commentAuthor" placeholder="ชื่อคุณ / Your name">
+        <input type="text" id="commentText" placeholder="อัพเดทความคืบหน้า... / Progress update...">
+        <button type="button" class="submit" id="commentSubmit">ส่ง <span class="en-i">· Send</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- team passcode screen -->
+<div class="gate" id="gate" hidden>
+  <form class="gate-box" id="gateForm" autocomplete="off">
+    <div class="eyebrow">ใกล้กัน · Glaigan Team Ops</div>
+    <h2>ใส่รหัสทีม<span class="en">Enter the team passcode</span></h2>
+    <p class="note-line" style="margin:0;">ถามรหัสจากหัวหน้าทีม ใส่ครั้งเดียว เครื่องนี้จะจำไว้<span class="en">Ask your manager for it. You only need to enter it once on this device.</span></p>
+    <input type="password" id="gateKey" placeholder="รหัสทีม / Team passcode" required>
+    <div class="gate-err" id="gateErr" hidden>รหัสไม่ถูกต้อง ลองอีกครั้ง<span class="en">Wrong passcode — please try again.</span></div>
+    <button type="submit" class="submit" id="gateBtn">เข้าใช้งาน <span class="en-i">· Enter</span></button>
+  </form>
+</div>
+
+<script src="config.js"></script>
+<script src="sheets-db.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
